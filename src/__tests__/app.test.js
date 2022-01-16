@@ -6,10 +6,10 @@ import {
   screen,
   act,
   waitForElement,
+  waitForElementToBeRemoved,
 } from "@testing-library/react";
 import App from "../App";
 
-// need package --> npm i -D jest-fetch-mock
 global.fetch = require("jest-fetch-mock");
 
 const movieData = [
@@ -31,9 +31,8 @@ const movieData = [
 ];
 
 describe("App component", () => {
-  test("should display and hide loading", async () => {
+  test.skip("should display and hide loading", async () => {
     fetch.mockResponseOnce(JSON.stringify(movieData));
-
     act(() => {
       // fire events that update state
       render(<App />);
@@ -44,6 +43,22 @@ describe("App component", () => {
     await waitForElement(() => {
       screen.queryByTestId("movie-list");
       expect(screen.queryByTestId("loading")).toBeFalsy();
+    });
+  });
+
+  test("should display an error on bad request", async () => {
+    fetch.mockResponseOnce(null, { status: 500 });
+
+    act(() => {
+      render(<App />);
+    });
+
+    expect.assertions(1);
+
+    await waitForElementToBeRemoved(() => {
+      screen.getAllByTestId("loading");
+      expect(screen.queryByTestId("loading")).toBeFalsy();
+      expect(screen.queryByText(/Error loading movies/i)).toBeTruthy();
     });
   });
 });
