@@ -62,4 +62,20 @@ describe("MovieDetails component", () => {
       expect(highlightedStars.length).toBe(0);
     });
   });
+
+  test("clicking rating star should update movie rating", () => {
+    const update = jest.fn();
+    const { container } = render(
+      <MovieDetails movie={selectedMovie} updateMovie={update} />
+    );
+    const stars = container.querySelectorAll(".rate-container svg");
+
+    stars.forEach((star) => {
+      fireEvent.click(star);
+    });
+
+    setTimeout(() => {
+      expect(update).toBeCalledTimes(stars.length);
+    }, 2000);
+  });
 });
