@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import MovieDetails from "../components/movie-details";
 
 const selectedMovie = {
@@ -35,5 +35,31 @@ describe("MovieDetails component", () => {
 
     const noOfRatings = screen.getByTestId("no-of-ratings");
     expect(noOfRatings.innerHTML).toBe(`(${selectedMovie.no_of_ratings})`);
+  });
+
+  test("mouseover should highlight the rating stars", () => {
+    const { container } = render(<MovieDetails movie={selectedMovie} />);
+    const stars = container.querySelectorAll(".rate-container svg");
+
+    stars.forEach((star, idx) => {
+      fireEvent.mouseOver(star);
+      const highlightedStars = container.querySelectorAll(".purple");
+
+      expect(highlightedStars.length).toBe(idx + 1);
+    });
+  });
+
+  test("mouseleave should un-highlight all rating stars", () => {
+    const { container } = render(<MovieDetails movie={selectedMovie} />);
+    const stars = container.querySelectorAll(".rate-container svg");
+
+    stars.forEach((star, idx) => {
+      fireEvent.mouseOver(star);
+      fireEvent.mouseOut(star);
+      const highlightedStars = container.querySelectorAll(".purple");
+
+      expect(highlightedStars.length).not.toBe(idx + 1);
+      expect(highlightedStars.length).toBe(0);
+    });
   });
 });
