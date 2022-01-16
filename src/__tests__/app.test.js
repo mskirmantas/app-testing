@@ -46,7 +46,7 @@ describe("App component", () => {
     });
   });
 
-  test("should display an error on bad request", async () => {
+  test.skip("should display an error on bad request", async () => {
     fetch.mockResponseOnce(null, { status: 500 });
 
     act(() => {
@@ -59,6 +59,30 @@ describe("App component", () => {
       screen.getAllByTestId("loading");
       expect(screen.queryByTestId("loading")).toBeFalsy();
       expect(screen.queryByText(/Error loading movies/i)).toBeTruthy();
+    });
+  });
+
+  test.skip("should display movie details when clicked on movie name", async () => {
+    fetch.mockResponseOnce(JSON.stringify(movieData));
+    act(() => {
+      render(<App />);
+    });
+    await waitForElementToBeRemoved(() => {
+      screen.getAllByTestId("loading");
+    });
+
+    const movieTitles = screen.getAllByTestId("movie-title");
+
+    fireEvent.click(movieTitles[0]);
+    await wait(() => {
+      //getting by movie description instead of title, as title appears more than once
+      expect(screen.getByText(movies[0].description)).toBeTruthy();
+    });
+
+    fireEvent.click(movieTitles[1]);
+    await wait(() => {
+      expect(screen.queryByText(movies[0].description)).toBeFalsy();
+      expect(screen.getByText(movies[1].description)).toBeTruthy();
     });
   });
 });
