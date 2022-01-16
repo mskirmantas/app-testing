@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, wait } from "@testing-library/react";
+import { render, fireEvent, wait, screen } from "@testing-library/react";
 import MovieForm from "../components/movie-form";
 
 // need package --> npm i -D jest-fetch-mock
@@ -89,6 +89,28 @@ describe("MovieForm component", () => {
 
     await wait(() => {
       expect(updateMovie).toBeCalledTimes(0); //as it should be disabled
+    });
+  });
+
+  test.skip("should trigger API call when clicked on new movie", async () => {
+    const handleMovieCreated = jest.fn();
+    fetch.mockImplementationOnce(JSON.stringify(movie));
+
+    const { getByRole } = render(
+      <MovieForm movie={emptyMovie} movieCreated={handleMovieCreated} />
+    );
+
+    const titleInput = screen.getByLabelText(/title/i);
+    const descriptionInput = screen.getByLabelText(/description/i);
+    const submitButton = getByRole("button", { name: /create/i });
+
+    fireEvent.change(titleInput, { target: { value: "Title1" } });
+    fireEvent.change(descriptionInput, { target: { value: "Description2" } });
+    fireEvent.click(submitButton);
+
+    await wait(() => {
+      expect(handleMovieCreated.mock.calls[0][0]).toStrictEqual(movie);
+      expect(handleMovieCreated).toBeCalledWith(movie);
     });
   });
 });
