@@ -14,7 +14,7 @@ function MovieForm(props) {
 
   const updateClicked = () => {
     API.updateMovie(props.movie.id, { title, description }, token["mr-token"])
-      .then((resp) => props.udpatedMovie(resp))
+      .then((resp) => props.updateMovie(resp))
       .catch((error) => console.log(error));
   };
 
