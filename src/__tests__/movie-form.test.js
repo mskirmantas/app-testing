@@ -2,6 +2,9 @@ import React from "react";
 import { render, fireEvent, wait } from "@testing-library/react";
 import MovieForm from "../components/movie-form";
 
+// need package --> npm i -D jest-fetch-mock
+global.fetch = require("jest-fetch-mock");
+
 const emptyMovie = {
   title: "",
   description: "",
@@ -32,10 +35,10 @@ describe("MovieForm component", () => {
     expect(getByRole("button", { name: /update/i })).toBeTruthy();
   });
 
-  //   test("should trigger API request when button is clicked", async () => {
+  //   test("shouldn't trigger API request when button is clicked", async () => {
   //     const updateMovie = jest.fn();
 
-  //     jest.spyOn(global, "fetch").mockImplementation(() => {
+  //     jest.spyOn(global, "fetch").mockImplementation(() => { //mocking for all FETCH
   //       Promise.resolve({
   //         json: () => Promise.resolve(movie),
   //       });
@@ -51,4 +54,41 @@ describe("MovieForm component", () => {
   //       expect(updateMovie).toBeCalledTimes(1);
   //     });
   //   });
+
+  test("shouldn't trigger API request when button is clicked on empty form", async () => {
+    const updateMovie = jest.fn();
+    jest.spyOn(global, "fetch").mockImplementation(() => {
+      Promise.resolve({
+        json: () => Promise.resolve(movie),
+      });
+    });
+
+    const { getByRole } = render(
+      <MovieForm movie={emptyMovie} updateMovie={updateMovie} />
+    );
+
+    const submitButton = getByRole("button", { name: /create/i });
+    fireEvent.click(submitButton);
+
+    await wait(() => {
+      expect(updateMovie).toBeCalledTimes(0); //as it should be disabled
+    });
+  });
+
+  test("shouldn't trigger API request when button is clicked on empty form (alternative)", async () => {
+    // need package --> npm i -D jest-fetch-mock
+    const updateMovie = jest.fn();
+    fetch.mockImplementationOnce(JSON.stringify(emptyMovie));
+
+    const { getByRole } = render(
+      <MovieForm movie={emptyMovie} updateMovie={updateMovie} />
+    );
+
+    const submitButton = getByRole("button", { name: /create/i });
+    fireEvent.click(submitButton);
+
+    await wait(() => {
+      expect(updateMovie).toBeCalledTimes(0); //as it should be disabled
+    });
+  });
 });
